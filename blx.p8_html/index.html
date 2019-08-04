@@ -470,7 +470,7 @@
 	function (event) {
 		event = event || window.event;
 		if (!p8_is_running) return;
-		var numFromPico8 = readFromGpio(pico8_gpio, 1, 8);
+		var numFromPico8 = readFromGpioUnsigned(pico8_gpio, 1, 8);
 		console.log(numFromPico8)
 		getTodoData();
 		if (pico8_state.has_focus == 1)
@@ -509,12 +509,12 @@
 
 	function getTodoData() {
 
-		fetch(`https://jsonplaceholder.typicode.com/todos/${readFromGpio(pico8_gpio, 1, 8)+1}`)
+		fetch(`https://qrng.anu.edu.au/API/jsonI.php?length=5&type=uint8`)
 			.then(response => response.json())
 			.then(json => {
 				
 				console.log(json)
-				writeToGpio(pico8_gpio,json.id,1,8)
+				writeToGpioUnsigned(pico8_gpio,json.data[0],1,8)
 			})
 	}
 

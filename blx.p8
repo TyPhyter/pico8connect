@@ -12,7 +12,7 @@ __lua__
 function _init()
   cartdata("typhyter_blx_cd")
   dset(0, 1)
-  write_gpio(7, 1, 8)
+  write_gpio_unsigned(7, 1, 8)
   printh("started")
   poke(0x5f2c,3) -- set mode3 64x64
   animTimer=0
@@ -44,7 +44,7 @@ function _draw()
   
   -- draw_cols()
   print("dget: "..tostr(dget(0)))
-  print("gpio: "..tostr(read_gpio(1, 8)))
+  print("gpio: "..tostr(read_gpio_unsigned(1, 8)))
   print("cpu: "..tostr(stat(1)).."%")
   print("mem: "..tostr(stat(0)).."/2048")
 end
