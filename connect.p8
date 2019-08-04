@@ -5,23 +5,17 @@ __lua__
 -- untitled
 -- typhyter
 
--- #include blx.blx_ctrlr.lua
--- #include blx.col_ctrlr.lua
 -- #include pico8-messenger.lua
 
 function _init()
-  cartdata("typhyter_blx_cd")
+  cartdata("p8connext_cd")
   dset(0, 1)
   write_gpio_unsigned(7, 1, 8)
   printh("started")
-  poke(0x5f2c,3) -- set mode3 64x64
-  animTimer=0
-  -- init_blx()
-  init_cols()
+  -- poke(0x5f2c,3) -- set mode3 64x64
 end
 
 function _update60()
-  update_cols()
   if btnp(5) then
     -- printh("gpio: "..tostr(peek(0x5f80)))
     dset(0,dget(0) + 10)
@@ -32,74 +26,12 @@ function _update60()
 end
 
 function _draw()
-  cls()
-
-  -- column divider bars
-  -- for x=0,7 do
-  -- 	for y=0,6 do
-  -- 		spr(1,x*8+0,y*8+0)
-  -- 	end
-  -- end
+  cls()  
   
-  
-  -- draw_cols()
   print("dget: "..tostr(dget(0)))
   print("gpio: "..tostr(read_gpio_unsigned(1, 8)))
   print("cpu: "..tostr(stat(1)).."%")
   print("mem: "..tostr(stat(0)).."/2048")
-end
-
-function create_blx(cnt, col)
-  local obj = {}
-  for i=1,cnt do
-    local block = {}
-    block.id = 5
-    block.color = flr(1+rnd(5))
-    block.column = col
-    block.y = 0 + (i - 1) * 5
-    block.frame = 0
-    add(obj,block)
-  end
-  return obj
-end
-
-function init_cols() 
-  cols = {}
-  for i=1, 7 do
-    local col_blx = create_blx(2,i)
-    col = {}
-    col.blx = col_blx
-    add(cols, col)
-  end 
-end
-
-function draw_cols()
-
-  foreach(cols, function(col)
-
-    foreach(col.blx, function(b)
-
-      x=5+(8*(b.column-1))
-      y=b.y
-      rectfill(x,y,x+5,y+5,b.color)
-    
-      spr(5+b.frame,x,y)
-    end)
-  end)
-end
-
-function update_cols()
-
-  animTimer+=.0125
-  if animTimer >= 1 then
-    animTimer=0
-    foreach(cols, function(col)
-      foreach(col.blx, function(b)
-        b.y+=5
-        if(rnd(1) > .65) b.frame=flr(rnd(3))
-      end)
-    end)
-  end
 end
 
 function write_gpio(num,pin_index,bits)

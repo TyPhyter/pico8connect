@@ -1,7 +1,6 @@
 ﻿<html><head>
 <title>PICO-8 Cartridge</title>
 <meta name="viewport" content="width=device-width">
-<script type="text/javascript" src="pico8-messenger.js"></script>
 <script type="text/javascript">
 
 	// Default shell for PICO-8 0.1.12
@@ -29,7 +28,7 @@
 	// var pico8_mouse = [0,0,0];
 
 	// When pico8_gpio is defined, reading and writing to gpio pins will read and write to these values
-	var pico8_gpio = new Array(128);
+	// var pico8_gpio = new Array(128);
 
 	// When pico8_audio_context context is defined, the html shell (this file) is responsible for creating and managing it
 	// Otherwise, PICO-8 will create its own one
@@ -404,7 +403,7 @@
 
 		}
 		e.type = "application/javascript";
-		e.src = "blx.p8.js";
+		e.src = "new.js";
 		e.id = "e_script";
 		
 		document.body.appendChild(e); // load and run
@@ -470,9 +469,6 @@
 	function (event) {
 		event = event || window.event;
 		if (!p8_is_running) return;
-		var numFromPico8 = readFromGpioUnsigned(pico8_gpio, 1, 8);
-		console.log(numFromPico8)
-		getTodoData();
 		if (pico8_state.has_focus == 1)
 			if ([32, 37, 38, 39, 40, 77, 82, 9].indexOf(event.keyCode) > -1)       // cursors, M R, tab
 				if (event.preventDefault) event.preventDefault();
@@ -507,16 +503,6 @@
 		}
 	}
 
-	function getTodoData() {
-
-		fetch(`https://qrng.anu.edu.au/API/jsonI.php?length=5&type=uint8`)
-			.then(response => response.json())
-			.then(json => {
-				
-				console.log(json)
-				writeToGpioUnsigned(pico8_gpio,json.data[0],1,8)
-			})
-	}
 
 </script>
 
@@ -555,7 +541,7 @@ canvas{
 
 .p8_start_button{
 	cursor:pointer;
-	background:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAAEWklEQVR4Ae2dz0pcSRjFT19maRppMFEbhMnCrkZIMwMJogO9qI2LgIvhPoDPMJvZSV4jmzxACIxoIFkIIzgyGFAUJNFFFrPomD9IsF23syi53vb+6VvWza1POB+1aLp/VpXn1PedLYBa+tIKWmX+Sr40ngKJM8CgxQ8g78RTIGkGhO1m2G4Wby7yLnwAlu9iSEoLYQpEA2gABfJogFbQyiLryTvwgdf8ZyGzAzgcquIpkDQDLKYbeWeeGSAwAzgoKuUpkDgDDFr8APJOPAWSZkC5KU8+nw+85j8LDGGBIUyBaAANoEAeDdAKWllkPXkHPvCa/yxkdgCHQ1U8BfLKX5kQr7A9DeDl+170uUgZfvXPPwD8tb6eQ84OLiK+21CpzMPlBQAf13YA3H9wfmP/v5+/ztnfhbe9j60+yWIGiAiAtNItAGGvD2BsfgnAxb9v8rzVLQArM4vR93u726n8wdFJxHf3M06P1dbZh9T9zXssl7e9j60+2DxmB8iqn7LefryyvE3yWa8+f//ifNYrLou3vY+tPswAcZViQNjrh70+No+TAyu1yLvw7AB5GTCU2r0+gJNgDMDs4GJ0yp9ejjxyiN8HgO9TAwDjn9Jfg2jeVp9EE7ADPFcNqOVkd3c//deHywsAPq7tANg6+xDxq4+fAnj2biPvTPMKcvePl8v+nYyO/PXJbwD2drcBHBydRHz9MP0+vz9dAPBqYwfA+dfr+2TVyswigBf//XPjPuyAO9EBumWyG8CXz/XRL/SXy4gfm1+Kvr/yP6Pi+8f7qdz9zXTOr4PJWsS//Tb6/z1/dH2fl9P3Cgp9xZs8YAfcgQ4w06rbUAU7YGjSFalK9u/MzRbsAMPXJ0bfx3TA7e6TLHaA50oxIOz1zcAqPt3I35pnB0iJgcTSClp1G+1uo92Za3XmWuZzcsV5swwf/2ZoVbi/IfNXnK9PtOsTV/cxn5PL5T5JndkBIp7/cMWSvbuf+BUA8H1qEH0+mExn4tU5vUwlzffjn26+g3L3z6/4X9UP08/6+f5t7pPCbx4zA8RnQNhuhu1mZjaQL5VnB8jrgPzUJl82T4FoAA2gQKIM0ApaWWQ9eQc+8Jr/LGR2AIdDVTwFkmaAxXQj78wzAwRmAAdFpTwFEmeAQYsfQN6Jp0DSDCg35cnn84HX/GeBISwwhCkQDaABFMijAVpBK4usJ+/AB17zn4XMDuBwqIqnQNIMsJhu5J15ZoDADOCgqJSnQOIMMGjxA8g78RRImgHlpjz5fD7wmv8sMIQFhjAFogE0gAJ5NEAraGWR9eQd+MBr/rOQ2QEcDlXxFEiaARbTjbwzzwwQmAEcFJXyFEicAQYtfgB5J54CSTOg3JQnn88HXvOfBYawwBCmQDSABlAgjwZoBa0ssp68Ax94zX8WMjuAw6EqngJJM8BiupF35pkBAjOAq9JFCWgADeCiATSAiwbQAC4aQAO4aAAN4KIBNICLBtAArh++/gcalVnUGy/iUAAAABB0RVh0TG9kZVBORwAyMDExMDIyMeNZtsEAAAAASUVORK5CYII=");
+	background:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAACLElEQVR4Ae3dUY6rMAxA0bQ7TbuvstX3wSiy0jhA1acZ2hNdVSGYAr7B/i213mu9l3JZaYfr5HmesRmAMS3F7bcltMtvdmpzHROuJR+13obry/KYXGUcGgMBLe9ZojMxxosCYkK7+TDXQzFrJDcvDIX4dymXWu+tCQ/nMSaji8deYspa6uPhZH2oQU4P0TfhPUU8a87Gi0045n1ZHpv51WnfLGCY0HWxnar11sT4At47FOLfpVxqvbc2G+ebTTXGZ+sxoGv4h+71sXRJGf5m2ckSl12b3Wtyi4/npwlvNth31f1ab7GvxPXvbC29gGV5DBORiTk64p+3+ddmv5RyXZZH3JUxO3ExS1C3i5/n6yTb9f/D8enG9/W9v9aEV9Y2OJxnxIAsfv7/WfudP0/3u/mcZ2rCh3pAF5mVqa7ur4eTot9aQvcwe/7/lE04vkBW9/e8ZFbEu7o/DBuuZ8HzXnI+AXt2056X3Nyh2ec1v/b51M4v45QCsk03qUstPtuVMaALfr621Z/sktc2x18ep+xdH4QUEEAACCAABBAAAggAAQSAAAJAAAEggAAQQAAIIAAEEAACCAABBIAAAkAAASCAABBAAAggAAQQAAIIAAEEgAACQAABIIAAEEAACCAABBAAAggAAQSAAAJAAAEggAACpIAAAkAAASCAABBAAAggAAQQAAIIAAEEgAACQAABIIAAEEAACCAABBAAAggAAQSAAAJAAAEggAAc5R9ba1nOb5Q28AAAABB0RVh0TG9kZVBORwAyMDExMDIyMeNZtsEAAAAASUVORK5CYII=");
 	-repeat center;
 	-webkit-background-size:cover; -moz-background-size:cover; -o-background-size:cover; background-size:cover;
 }

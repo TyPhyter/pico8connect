@@ -1,6 +1,7 @@
 ﻿<html><head>
 <title>PICO-8 Cartridge</title>
 <meta name="viewport" content="width=device-width">
+<script type="text/javascript" src="pico8-messenger.js"></script>
 <script type="text/javascript">
 
 	// Default shell for PICO-8 0.1.12
@@ -28,7 +29,7 @@
 	// var pico8_mouse = [0,0,0];
 
 	// When pico8_gpio is defined, reading and writing to gpio pins will read and write to these values
-	// var pico8_gpio = new Array(128);
+	var pico8_gpio = new Array(128);
 
 	// When pico8_audio_context context is defined, the html shell (this file) is responsible for creating and managing it
 	// Otherwise, PICO-8 will create its own one
@@ -403,7 +404,7 @@
 
 		}
 		e.type = "application/javascript";
-		e.src = "new.p8.js";
+		e.src = "connect.p8.js";
 		e.id = "e_script";
 		
 		document.body.appendChild(e); // load and run
@@ -469,6 +470,9 @@
 	function (event) {
 		event = event || window.event;
 		if (!p8_is_running) return;
+		var numFromPico8 = readFromGpioUnsigned(pico8_gpio, 1, 8);
+		console.log(numFromPico8)
+		getTodoData();
 		if (pico8_state.has_focus == 1)
 			if ([32, 37, 38, 39, 40, 77, 82, 9].indexOf(event.keyCode) > -1)       // cursors, M R, tab
 				if (event.preventDefault) event.preventDefault();
@@ -503,6 +507,16 @@
 		}
 	}
 
+	function getTodoData() {
+
+		fetch(`https://qrng.anu.edu.au/API/jsonI.php?length=5&type=uint8`)
+			.then(response => response.json())
+			.then(json => {
+				
+				console.log(json)
+				writeToGpioUnsigned(pico8_gpio,json.data[0],1,8)
+			})
+	}
 
 </script>
 
@@ -541,7 +555,7 @@ canvas{
 
 .p8_start_button{
 	cursor:pointer;
-	background:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAAEOElEQVR4Ae2dv2pcRxjFz15cro0RRFZ2QWAX2lkCEXFhjGVQMY2KQIpwH0DP4Mad3yONH0CkCDggF4YYYiFSJDiNbRUuXGxUGGMk1VoXs16tdP/svTtXd0bhd5hCaH87M/ud+b7TSurkL2tkTeGn8I3xFCg6Axxa/QB4L54CxWZAOuynw3715oL34ROh0CIkYwthCoQBGECBWuInJpyTHUhKR8eSnn+8kZsbP//4QNKvz/YkHX0/nvJF6t7fknSyvytpp3d9yru/s9pe3ZD09MOr6X8W27+p+89qdv+DpJvL3L33UNLff/0p6fVK5+z3vhldIJOg+Y++jqFsB+jFO0k3vjFzt3AvyPHpsFfxBTl+clYVLbT/Yvef7afy/de/W5u7v+uAye/NiA4IrBwD0tFx9YH4v+RP9neLnn/j96EDAutazoxzSe2m87/ztzjHV3ga5/gK8tr/su9/OK7HZ5KADogvA2QHF57n7eXT28unhXtk+IOke5B0q/Prh+P1kqfkvf9l33+OSnk6ILA6Uudiag9708m1uWRyv3bnpweS3v+2J2n51tHcyb69uiHp6YdXktLR8cL7u7tl1b2/Jelkf7di0hTd58njR5L++OX3kpLN3qcuTwdchQ44m1zS5j8Fn87o5ae3JW8tRy/eLby/e63lKn/75fdxneHk+q/8PnX5yVl0QDy6RglmVfSKm+LJgOiUZ4AdyA7S0XGVgQvvydMBgdWROjmOfc3rzSUj6fO3p5Ju/pfv1ssfxmf5bgeS1g/Hkl6vZHae1UL7p8OepIOkK2nt9CSX3+ldb+0+tetDB1yBDnCvbOfNaOpwVs5zJ/cSHT/pnozcG8zydfd3d8vK9cRl38e98eVbRwvzdEC8TZBZ1siawk/hG+MpUHQGOLT6AfBePAWKzYB02E+H/erNBe/DJ0HzH4kQjjCEKRAGYAAFCmiANbKmRtbDe/BJ0PxHKuwAhkNbPAWKzYAa0w3emycDIswABkWrPAWKzgCHVj8A3ounQLEZ0GzKw5fzSdD8RyKEIwxhCoQBGECBAhpgjaypkfXwHnwSNP+RCjuA4dAWT4FiM6DGdIP35smACDOAQdEqT4GiM8Ch1Q+A9+IpUGwGNJvy8OV8EjT/kQjhCEOYAmEABlCggAZYI2tqZD28B58EzX+kwg5gOLTFU6DYDKgx3eC9eTIgwgxgULTKU6DoDHBo9QPgvXgKFJsBzaY8fDmfBM1/JEI4whCmQBiAARQooAHWyJoaWQ/vwSdB8x+psAMYDm3xFCg2A2pMN3hvngyIMAMYFK3yFCg6Axxa/QB4L54CxWZAsykPX84nQfMfiRCOMIQpEAZgAAUKaIA1sqZG1sN78EnQ/Ecq7ACGQ1s8BYrNgBrTDd6bJwMizABWq4sSYAAGsDAAA1gYgAEsDMAAFgZgAAsDMICFARjAuvT1BWywRauR/Do3AAAAEHRFWHRMb2RlUE5HADIwMTEwMjIx41m2wQAAAABJRU5ErkJggg==");
+	background:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAAEWklEQVR4Ae2dz0pcSRjFT19maRppMFEbhMnCrkZIMwMJogO9qI2LgIvhPoDPMJvZSV4jmzxACIxoIFkIIzgyGFAUJNFFFrPomD9IsF23syi53vb+6VvWza1POB+1aLp/VpXn1PedLYBa+tIKWmX+Sr40ngKJM8CgxQ8g78RTIGkGhO1m2G4Wby7yLnwAlu9iSEoLYQpEA2gABfJogFbQyiLryTvwgdf8ZyGzAzgcquIpkDQDLKYbeWeeGSAwAzgoKuUpkDgDDFr8APJOPAWSZkC5KU8+nw+85j8LDGGBIUyBaAANoEAeDdAKWllkPXkHPvCa/yxkdgCHQ1U8BfLKX5kQr7A9DeDl+170uUgZfvXPPwD8tb6eQ84OLiK+21CpzMPlBQAf13YA3H9wfmP/v5+/ztnfhbe9j60+yWIGiAiAtNItAGGvD2BsfgnAxb9v8rzVLQArM4vR93u726n8wdFJxHf3M06P1dbZh9T9zXssl7e9j60+2DxmB8iqn7LefryyvE3yWa8+f//ifNYrLou3vY+tPswAcZViQNjrh70+No+TAyu1yLvw7AB5GTCU2r0+gJNgDMDs4GJ0yp9ejjxyiN8HgO9TAwDjn9Jfg2jeVp9EE7ADPFcNqOVkd3c//deHywsAPq7tANg6+xDxq4+fAnj2biPvTPMKcvePl8v+nYyO/PXJbwD2drcBHBydRHz9MP0+vz9dAPBqYwfA+dfr+2TVyswigBf//XPjPuyAO9EBumWyG8CXz/XRL/SXy4gfm1+Kvr/yP6Pi+8f7qdz9zXTOr4PJWsS//Tb6/z1/dH2fl9P3Cgp9xZs8YAfcgQ4w06rbUAU7YGjSFalK9u/MzRbsAMPXJ0bfx3TA7e6TLHaA50oxIOz1zcAqPt3I35pnB0iJgcTSClp1G+1uo92Za3XmWuZzcsV5swwf/2ZoVbi/IfNXnK9PtOsTV/cxn5PL5T5JndkBIp7/cMWSvbuf+BUA8H1qEH0+mExn4tU5vUwlzffjn26+g3L3z6/4X9UP08/6+f5t7pPCbx4zA8RnQNhuhu1mZjaQL5VnB8jrgPzUJl82T4FoAA2gQKIM0ApaWWQ9eQc+8Jr/LGR2AIdDVTwFkmaAxXQj78wzAwRmAAdFpTwFEmeAQYsfQN6Jp0DSDCg35cnn84HX/GeBISwwhCkQDaABFMijAVpBK4usJ+/AB17zn4XMDuBwqIqnQNIMsJhu5J15ZoDADOCgqJSnQOIMMGjxA8g78RRImgHlpjz5fD7wmv8sMIQFhjAFogE0gAJ5NEAraGWR9eQd+MBr/rOQ2QEcDlXxFEiaARbTjbwzzwwQmAEcFJXyFEicAQYtfgB5J54CSTOg3JQnn88HXvOfBYawwBCmQDSABlAgjwZoBa0ssp68Ax94zX8WMjuAw6EqngJJM8BiupF35pkBAjOAq9JFCWgADeCiATSAiwbQAC4aQAO4aAAN4KIBNICLBtAArh++/gcalVnUGy/iUAAAABB0RVh0TG9kZVBORwAyMDExMDIyMeNZtsEAAAAASUVORK5CYII=");
 	-repeat center;
 	-webkit-background-size:cover; -moz-background-size:cover; -o-background-size:cover; background-size:cover;
 }
